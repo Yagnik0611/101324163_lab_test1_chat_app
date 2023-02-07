@@ -17,6 +17,20 @@ background: linear-gradient(to right, #A8CABA, #5D4157); /* W3C, IE 10+/ Edge, F
 
 
         }
+        
+.btn{
+  padding: 0.6rem 1.2rem;
+  background: #da5767;
+  border: 2px solid #da5767;
+}
+.btn-primary:hover {
+
+    
+    background-color: #df8c96;
+    border-color: #df8c96;
+  transition: .3s;
+
+} 
     button{
         margin: 4px;
     }
@@ -106,7 +120,10 @@ background: linear-gradient(to right, #A8CABA, #5D4157); /* W3C, IE 10+/ Edge, F
         />
         <button class="btn btn-success" required onclick="sendMessage()" > Send</button>
     </div>
-    <footer><button onclick="leaveRoom()" class="btn btn-warning" >Leave Room</a></footer></button>
+
+    <footer>
+        <button onclick="logOUt()" class="btn btn-primary" >Log Out</a></footer></button>
+        <button onclick="leaveRoom()" class="btn btn-warning" >Leave Room</a></footer></button>
     <div class="chatHistory">
         <p>Chat history</p>
         <div id="history"></div>
@@ -156,6 +173,10 @@ background: linear-gradient(to right, #A8CABA, #5D4157); /* W3C, IE 10+/ Edge, F
             printMessage(newRoomMessage)
         })
     function leaveRoom() {
+            client.emit('leaveRoom', room, username)
+            window.location.href = "/index";
+        }
+        function logOUt() {
             client.emit('leaveRoom', room, username)
             window.location.href = "/login";
         }
