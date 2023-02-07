@@ -20,7 +20,6 @@ const io = require("socket.io")(http);
 let users = [];
 io.on('connection', (socket) => {
   console.log('Connected ')
-  socket.emit('welcome', 'Welcome to Socket Programming : ' + socket.id)
   socket.on('message', async (data) => {
     const message = {
       username: data.username,
@@ -28,7 +27,8 @@ io.on('connection', (socket) => {
     }
     socket.broadcast.to(data.room).emit('newMessage', message)
 
-    console.log(`${data.username} send a message to ${data.room}`)
+ 
+
     try {
       const newMsg = gmModel({
         from_user: data.username,
@@ -157,6 +157,7 @@ app.get("/login", (req, res) => {
 app.post("/chathistory",async(req,res)=>{
   try {
     const { room } = req.body
+    console.log(room)
     const result = await gmModel.find({ room: room})
     res.status(200).send(result)
 }

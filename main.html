@@ -5,7 +5,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-
+    <script src='https://kit.fontawesome.com/a076d05399.js' crossorigin='anonymous'></script>
+    
     <title>Document</title>
 </head>
 <style>
@@ -19,7 +20,18 @@ background: linear-gradient(to right, #A8CABA, #5D4157); /* W3C, IE 10+/ Edge, F
     button{
         margin: 4px;
     }
-    
+    .time-right {
+  float:inline-end;
+  color: #aaa;
+  padding-bottom: 10px;
+}
+    .msg {
+  border: 2px solid #dedede;
+  background-color: #cfeef8;
+  border-radius: 5px;
+  
+  margin: 5px 0;
+}
     .container{
                 text-align: center;
                 margin-top: 2%;
@@ -51,6 +63,7 @@ background: linear-gradient(to right, #A8CABA, #5D4157); /* W3C, IE 10+/ Edge, F
         overflow-y: scroll;
         
     }
+    
     .chatHistory{
         background-color: white;
         height: 150px;
@@ -91,7 +104,7 @@ background: linear-gradient(to right, #A8CABA, #5D4157); /* W3C, IE 10+/ Edge, F
           placeholder="Enter Message"
           required
         />
-        <button class="btn btn-success" onclick="sendMessage()" > Send</button>
+        <button class="btn btn-success" required onclick="sendMessage()" > Send</button>
     </div>
     <footer><button onclick="leaveRoom()" class="btn btn-warning" >Leave Room</a></footer></button>
     <div class="chatHistory">
@@ -161,7 +174,15 @@ background: linear-gradient(to right, #A8CABA, #5D4157); /* W3C, IE 10+/ Edge, F
         })
     }
     function printMessage(message){
-        document.getElementById('messages').innerHTML += `<li> ${message.username}: ${message.message} </li>`
+        document.getElementById('messages').innerHTML += `
+        <div class="msg">
+            <span class="time-right"><i class='fas fa-comment'></i>    
+             ${message.username}</span>
+        <p> ${message.message}</p>
+       
+
+        </div>
+        `
     }
 
     fetch('http://localhost:9000/chathistory',{
@@ -176,8 +197,10 @@ background: linear-gradient(to right, #A8CABA, #5D4157); /* W3C, IE 10+/ Edge, F
             .then(res => res.json())
             .then(res => {
                 var result = res
+                
                 for(let i=0;i<result.length;i++){
                     document.getElementById("history").innerHTML +=
+                    console.log(result[i].from_user)
                             `<li> ${result[i].from_user} : ${result[i].message}</li>` 
                 }
             })
