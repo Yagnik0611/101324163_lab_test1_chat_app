@@ -3,50 +3,66 @@ const router = require("express").Router();
 // importing model
 let User = require("../models/userModels");
 
-
+let  http  = require( "../server.js")
 
 User = User.getModel;
 
 // view User
-router.route("/").get((req, res) => {
-  User.find()
-    .then((Users) => res.status(200).json(Users))
-    .catch((err) => res.status(400).json("Error: " + err));
+
+
+
+const io = require("socket.io")(http);
+
+let users = [];
+
+io.on("connection", socket => {
+console.log("Connected");
+socket.emit("welcome", "Welcome to Socket Programming: " + socket.id);
+
+socket.on("message", async data => {
+const message = {
+username: data.username,
+message: data.message
+};
+socket.to(data.room).broadcast.emit("newMessage", message);
+console.log(`${data.username} sent a message to ${data.room}`);
+try {
+  const newMessage = new gmModel({
+    from_user: data.username,
+    room: data.room,
+    message: data.message
+  });
+  await newMessage.save();
+} catch (error) {
+  throw new Error(error.message);
+}
+
+});
+
+socket.on("newUser", name => {
+if (!users.includes(name)) {
+users.push(name);
+}
+socket.id = name;
+});
+
+socket.on("joinroom", (room, username) => {
+socket.join(room);
+socket.to(room).broadcast.emit("joined", username);
+});
+
+socket.on("leaveRoom", (room, username) => {
+socket.to(room).broadcast.emit("left", username);
+});
+
+socket.on("disconnect", () => {
+  console.log(`${socket.id} disconnected`);
+});
 });
 
 
 
 
-
-
-router.route("/:id").delete((req, res) => {
-  const id = req.params.id;
-
-  User.findByIdAndDelete(id)
-    .then(() => res.status(200).json("User deleted"))
-    .catch((error) => {
-      res.status(500).send({ message: "Can not find User with given id." });
-    });
-});
-// update User with id
-
-router.route("/update/:id").put((req, res) => {
-  const email = req.params.id;
-  const newUser = req.body;
-
-  User.findOne({ email: email })
-    .then((User) => {
-      User.updateOne(newUser)
-        .then(() => res.json("User updated!"))
-        .catch((error) => {
-          const erro = handleErrors(error);
-          res.status(500).json({ erro });
-        });
-    })
-    .catch((error) => {
-      res.status(500).send({ message: "Can not find User with given id." });
-    });
-});
 
 
 
@@ -134,5 +150,79 @@ const handleErrors = (err) => {
   }
   return errors;
 };
+// adding user when he clicks on submi
+router.post('/login', async (req, res) => {
+  const user = new userModel(req.body);
+  try {
+    await user.save((err) => {
+      if(err){
+          if (err.code === 11000) {
+             return res.redirect('/signup?err=username')
+          }
+        
+        res.send(err)
+      }else{
+        res.sendFile(__dirname + '/login.html')
+      }
+    });
+  } catch (err) {
+    res.status(500).send(err);
+  }
+});
 
+router.get("/", (req, res) => {
+  res.sendFile(__dirname + "/signup.html")
+})
+
+router.post('/', async (req, res) => {
+  const username=req.body.username
+  const password=req.body.password
+
+  const user = await userModel.find({username:username});
+  try {
+      if(user.length != 0){
+      if(user[0].password==password){
+          return res.redirect('/?uname='+username)
+      }
+      else{
+          return res.redirect('/login?wrong=pass')
+      }
+      }else{
+      return res.redirect('/login?wrong=uname')
+      }
+  } catch (err) {
+      res.status(500).send(err);
+  }
+});
+router.get("/index", (req,res) =>{
+  res.sendFile(__dirname + "/index.html")
+})
+
+router.get("/main", (req, res) => {
+  res.sendFile(__dirname + "/main.html")
+})
+
+
+router.get('/main/:room', async (req, res) => {
+  const room = req.params.room
+  const msg = await gmModel.find({room: room}).sort({'date_sent': 'desc'}).limit(10);
+  res.sendFile(__dirname + '/main.html')
+});
+
+
+
+router.get("/login", (req, res) => {
+  res.sendFile(__dirname + "/login.html")
+})
+
+router.post("/chathistory",async(req,res)=>{
+try {
+  const { room } = req.body
+  const result = await gmModel.find({ room: room})
+  res.status(200).send(result)
+}
+catch (e) {
+  res.status(400).send({ error: e.message });
+}
+})
 module.exports = router;

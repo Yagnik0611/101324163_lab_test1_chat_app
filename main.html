@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <title>Document</title>
+</head>
+<style>
+   body{
+    background: #5D4157;  /* fallback for old browsers */
+background: -webkit-linear-gradient(to right, #A8CABA, #5D4157);  /* Chrome 10-25, Safari 5.1-6 */
+background: linear-gradient(to right, #A8CABA, #5D4157); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+
+
+        }
+    button{
+        margin: 4px;
+    }
+    
+    .container{
+                text-align: center;
+                margin-top: 2%;
+               
+            margin-top: 10%;
+           border-radius: 10px;
+            background: #fefefe;  /* fallback for old browsers */
+           
+            padding: 30px;
+            box-shadow: rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px;
+            
+            }
+    .header{
+        font-size: 70px;
+  font-weight: 600;
+  background-image: conic-gradient(#553c9a, #ee4b2b, #00c2cb, #553c9a);
+  color: transparent;
+  background-clip: text;
+  -webkit-background-clip: text;}
+            
+    .messages{
+        border: 2px solid #dedede;
+
+  border-radius: 5px;
+  padding: 10px;
+  margin: 10px 0;
+        background-color: white;
+        height: 250px;
+        overflow-y: scroll;
+        
+    }
+    .chatHistory{
+        background-color: white;
+        height: 150px;
+        overflow-y: scroll;
+    }
+</style>
+<div class="container">
+    <header class="header" >
+      Chat App 
+    </header>
+    <main >
+      <div>
+          <div style=" display: flex;
+          justify-content: center;
+          border-radius:10px ;
+          width: auto;
+         background-color:  lightblue">
+         
+            <h3 style=" text-align: center;
+            text-transform: uppercase;
+            color: #4CAF50;">Room Name   : </h3><h3
+            style=" text-align: center;
+            text-transform: uppercase;
+            color: #4CAF50;
+            padding-left: 10px;" 
+            id="roomId"></h3>
+          </div>
+      </div>
+      <div class="messages" id="messages" class="overflow-auto">
+					<div class="message">
+					</div>
+      </div>
+    </main>
+    <div class="chat-form-container">
+        <input  class="form-control"
+          id="msg"
+          type="text"
+          placeholder="Enter Message"
+          required
+        />
+        <button class="btn btn-success" onclick="sendMessage()" > Send</button>
+    </div>
+    <footer><button onclick="leaveRoom()" class="btn btn-warning" >Leave Room</a></footer></button>
+    <div class="chatHistory">
+        <p>Chat history</p>
+        <div id="history"></div>
+      </div>
+  </div>
+  
+</body>
+<script src = "/socket.io/socket.io.js"></script>
+    <script>
+        const username = localStorage.getItem("username")
+        if(username ==""|| username ==null){
+            window.location.href = "/login"
+        }
+        function getRoom() {
+                let arr = window.location.href.split("/");
+                return arr[arr.length - 1];
+            }
+        const room = getRoom()
+        document.getElementById('roomId').innerHTML = room
+        
+        const client = io()
+        var mc=document.getElementById('messages')
+
+        client.emit('joinroom', getRoom(), username)
+        
+        client.on('welcome', (data) =>{
+            console.log(data)
+            mc.innerHTML += '<div>' + data + '</div>'
+        })
+
+        client.on('newMessage', (message) =>{
+            printMessage(message)
+        })
+
+        client.on('joined',(username)=>{
+            const newRoomMessage = {
+                message: `has Joined this group`,
+                username
+            }
+            printMessage(newRoomMessage)
+        })
+        client.on('left', (userName) => {
+            const newRoomMessage = {
+                message: `has left this group`,
+                username
+            }
+            printMessage(newRoomMessage)
+        })
+    function leaveRoom() {
+            client.emit('leaveRoom', room, username)
+            window.location.href = "/login";
+        }
+    
+    function sendMessage(){
+        client.emit('message', 
+        {   
+            username:username,
+            room: room,
+            message: document.getElementById('msg').value
+        })
+        printMessage(message= {
+            username: username,
+            room: room,
+            message: document.getElementById('msg').value
+        })
+    }
+    function printMessage(message){
+        document.getElementById('messages').innerHTML += `<li> ${message.username}: ${message.message} </li>`
+    }
+
+    fetch('http://localhost:9000/chathistory',{
+        method: "POST",
+            cache: 'no-cache',
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                room
+            })
+        }
+        )
+            .then(res => res.json())
+            .then(res => {
+                var result = res
+                for(let i=0;i<result.length;i++){
+                    document.getElementById("history").innerHTML +=
+                            `<li> ${result[i].from_user} : ${result[i].message}</li>` 
+                }
+            })
+            .catch(err => alert(err))
+    </script>
+</html>

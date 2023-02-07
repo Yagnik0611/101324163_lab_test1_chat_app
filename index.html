@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="./css/style.css">
+    <title style="font-size: larger;">Chat App</title>
+    <style>
+
+        body{
+            background: #5D4157;  /* fallback for old browsers */
+background: -webkit-linear-gradient(to right, #A8CABA, #5D4157);  /* Chrome 10-25, Safari 5.1-6 */
+background: linear-gradient(to right, #A8CABA, #5D4157); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+
+
+        }
+        .header{
+            font-size: large;
+            font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;    
+        }
+        .container{
+            text-align: center;
+            margin-top: 10%;
+           border-radius: 20px;
+            background: #fefefe;  /* fallback for old browsers */
+            width: 30%;
+            padding: 30px;
+            box-shadow: rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px;
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">Chat App</header>
+    
+    <div>
+        <main >
+            <div class="form-group">
+                <button class="btn btn-primary" type="submit" onclick="myFunction('news')">News</button>
+                <button class="btn btn-primary" type="submit" onclick="myFunction('covid19')">Covid-19</button>
+                <button class="btn btn-primary" type="submit" onclick="myFunction('nodejs')">NodeJs</button>
+            </div>
+        </main>
+    </div>
+</div>
+<script>
+    const user = localStorage.getItem("username")
+    if (user == "" || user == null) {
+        window.location.href = "/login"
+    }  
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const username = urlParams.get('username')
+    localStorage.setItem("username",username)
+    function myFunction(room) {
+        window.location.href="../main/"+room;
+        }
+</script>
+</body>
+</html>
